@@ -20,11 +20,7 @@ let package = Package(
     targets: [
         .target(
             name: "DecNet",
-            dependencies: [],
-            swiftSettings: [
-                .enableUpcomingFeature("BareSlashRegexLiterals"),
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            dependencies: []
         ),
         .testTarget(
             name: "DecNetTests",

@@ -5,28 +5,35 @@
 import PackageDescription
 
 let package = Package(
-    name: "DeclarativeConnectKit",
+    name: "DecNet",
     platforms: [
         .iOS(.v15),
         .macOS(.v12)
     ],
     products: [
         .library(
-            name: "DeclarativeConnectKit",
-            targets: ["DeclarativeConnectKit"]
+            name: "DecNet",
+            targets: ["DecNet"]
         )
     ],
-    dependencies: [
-        // Dependencies go here.
-    ],
+    dependencies: [],
     targets: [
         .target(
-            name: "DeclarativeConnectKit",
-            dependencies: []
+            name: "DecNet",
+            dependencies: [],
+            swiftSettings: [
+                .enableUpcomingFeature("BareSlashRegexLiterals"),
+                .enableExperimentalFeature("StrictConcurrency")
+            ]
         ),
         .testTarget(
-            name: "DeclarativeConnectKitTests",
-            dependencies: ["DeclarativeConnectKit"]
+            name: "DecNetTests",
+            dependencies: ["DecNet"]
+        ),
+        .executableTarget(
+            name: "DecNetExamples",
+            dependencies: ["DecNet"],
+            path: "Examples"
         )
     ]
 )

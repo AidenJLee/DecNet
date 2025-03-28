@@ -1,5 +1,5 @@
 import Foundation
-import DeclarativeConnectKit
+import DecNet
 
 // MARK: - Models
 

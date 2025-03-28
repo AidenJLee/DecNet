@@ -133,13 +133,13 @@ public class DecAuthManager {
 		if let expiration = tokenExpiration,
 		   expiration < Date(),
 		   let refreshToken = refreshToken {
-			return try await refreshToken(refreshToken)
+			return try await refreshTokenRequest(refreshToken)
 		}
 		
 		return token
 	}
 	
-	private func refreshToken(_ refreshToken: String) async throws -> String {
+	private func refreshTokenRequest(_ refreshToken: String) async throws -> String {
 		// TODO: 실제 토큰 갱신 로직 구현
 		throw DecError.unauthorized(nil)
 	}

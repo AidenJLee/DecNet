@@ -3,6 +3,10 @@ import DecNet
 
 // MARK: - Models
 
+struct UserList: Codable {
+    let users: [User]
+}
+
 struct User: Codable {
     let id: Int
     let name: String
@@ -16,92 +20,72 @@ struct Post: Codable {
     let userId: Int
 }
 
-// MARK: - Requests
+// MARK: - Requests within Models
 
-struct GetUserRequest: DecRequest {
-    typealias ReturnType = User
-    let path: String
-    
-    init(userId: Int) {
-        self.path = "/users/\(userId)"
+extension User {
+    struct Request: DecRequest {
+        typealias ReturnType = User
+        
+        let path: String
+        let method: HTTPMethod = .get
+        
+        init(userId: Int) {
+            self.path = "/users/\(userId)"
+        }
     }
 }
 
-struct GetUserPostsRequest: DecRequest {
-    typealias ReturnType = [Post]
-    let path: String
-    
-    init(userId: Int) {
-        self.path = "/users/\(userId)/posts"
+extension Post {
+    struct GetUserPostsRequest: DecRequest {
+        typealias ReturnType = [Post]
+        
+        let path: String
+        let method: HTTPMethod = .get
+        
+        init(userId: Int) {
+            self.path = "/users/\(userId)/posts"
+        }
     }
-}
-
-struct CreatePostRequest: DecRequest {
-    typealias ReturnType = Post
-    let path = "/posts"
-    let method: HTTPMethod = .post
-    let body: Params?
     
-    init(title: String, body: String, userId: Int) {
-        self.body = [
-            "title": title,
-            "body": body,
-            "userId": userId
-        ]
+    struct CreateRequest: DecRequest {
+        typealias ReturnType = Post
+        
+        let path = "/posts"
+        let method: HTTPMethod = .post
+        let body: Params?
+        
+        init(title: String, body: String, userId: Int) {
+            self.body = [
+                "title": title,
+                "body": body,
+                "userId": userId
+            ]
+        }
     }
 }
 
 // MARK: - Usage Example
 
 @available(iOS 15, macOS 10.15, *)
-class UserService {
-    private let decNet: DecNet
-    
-    init(baseURL: String) {
-        self.decNet = DecNet(
-            baseURL: baseURL,
-            logLevel: .debug,
-            retryPolicy: .default,
-            authManager: .default
-        )
-    }
-    
-    func getUser(id: Int) async throws -> User {
-        return try await decNet.request(GetUserRequest(userId: id))
-    }
-    
-    func getUserPosts(userId: Int) async throws -> [Post] {
-        return try await decNet.request(GetUserPostsRequest(userId: userId))
-    }
-    
-    func createPost(title: String, body: String, userId: Int) async throws -> Post {
-        return try await decNet.request(CreatePostRequest(title: title, body: body, userId: userId))
-    }
-}
-
-// MARK: - Example Usage
-
-@available(iOS 15, macOS 10.15, *)
-func example() async {
-    let userService = UserService(baseURL: "https://jsonplaceholder.typicode.com")
+func fetchData() async {
+    // DConnectKit 대신 DecNet 사용 (이름만 다르고 기능은 동일하다고 가정)
+    let connectKit = DecNet(baseURL: "https://jsonplaceholder.typicode.com")
     
     do {
-        // Get user
-        let user = try await userService.getUser(id: 1)
+        // 사용자 정보 가져오기
+        let user = try await connectKit.request(User.Request(userId: 1))
         print("User: \(user)")
         
-        // Get user's posts
-        let posts = try await userService.getUserPosts(userId: user.id)
+        // 사용자의 게시글 가져오기
+        let posts = try await connectKit.request(Post.GetUserPostsRequest(userId: user.id))
         print("Posts: \(posts)")
         
-        // Create new post
-        let newPost = try await userService.createPost(
-            title: "New Post",
-            body: "This is a new post",
-            userId: user.id
+        // 새 게시글 생성
+        let newPost = try await connectKit.request(
+            Post.CreateRequest(title: "New Post", body: "This is a new post", userId: user.id)
         )
-        print("Created post: \(newPost)")
+        print("Created Post: \(newPost)")
     } catch {
         print("Error: \(error)")
     }
-} 
+}

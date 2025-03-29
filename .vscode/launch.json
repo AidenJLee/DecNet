@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:DecNet}",
+            "name": "Debug DecNetExamples",
+            "program": "${workspaceFolder:DecNet}/.build/debug/DecNetExamples",
+            "preLaunchTask": "swift: Build Debug DecNetExamples"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:DecNet}",
+            "name": "Release DecNetExamples",
+            "program": "${workspaceFolder:DecNet}/.build/release/DecNetExamples",
+            "preLaunchTask": "swift: Build Release DecNetExamples"
+        }
+    ]
+}

@@ -16,29 +16,21 @@ public struct DecNet {
 	public var retryPolicy: DecRetryPolicy
 	
 	private let logger: DecLogger
-	private let authManager: DecAuthManager
 	
 	public init(
 		baseURL: String,
 		logLevel: DecLogLevel = .debug,
-		retryPolicy: DecRetryPolicy = .default,
-		authManager: DecAuthManager = .default
+		retryPolicy: DecRetryPolicy = .default
 	) {
 		self.baseURL = baseURL
 		self.logger = DecLogger(logLevel: logLevel)
 		self.dispatcher = DecDispatcher(logger: logger)
 		self.retryPolicy = retryPolicy
-		self.authManager = authManager
 	}
 	
 	public func request<Request: DecRequest>(_ request: Request) async throws -> Request.ReturnType {
 		guard var urlRequest: URLRequest = request.asURLRequest(baseURL: baseURL) else {
 			throw DecError.invalidRequest
-		}
-		
-		// 인증 토큰 추가
-		if let token = try? await authManager.getToken() {
-			urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 		}
 		
 		logger.log(request: urlRequest)
@@ -110,38 +102,6 @@ public struct DecRetryPolicy {
 	func delay(for attempt: Int) -> TimeInterval {
 		let delay = baseDelay * pow(2.0, Double(attempt))
 		return min(delay, maxDelay)
-	}
-}
-
-public class DecAuthManager {
-	public static let `default` = DecAuthManager()
-	
-	private var token: String?
-	private var tokenExpiration: Date?
-	private var refreshToken: String?
-	
-	public func setToken(_ token: String, expiration: Date? = nil, refreshToken: String? = nil) {
-		self.token = token
-		self.tokenExpiration = expiration
-		self.refreshToken = refreshToken
-	}
-	
-	public func getToken() async throws -> String? {
-		guard let token = token else { return nil }
-		
-		// 토큰이 만료되었고 갱신 토큰이 있는 경우 갱신 시도
-		if let expiration = tokenExpiration,
-		   expiration < Date(),
-		   let refreshToken = refreshToken {
-			return try await refreshTokenRequest(refreshToken)
-		}
-		
-		return token
-	}
-	
-	private func refreshTokenRequest(_ refreshToken: String) async throws -> String {
-		// TODO: 실제 토큰 갱신 로직 구현
-		throw DecError.unauthorized(nil)
 	}
 }
 
